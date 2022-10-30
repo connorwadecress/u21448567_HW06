@@ -1,0 +1,264 @@
+﻿@model IPagedList<u21448567_HW06.Models.product>
+
+@using PagedList.Mvc;
+@using PagedList;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+<h2>Products</h2>
+
+<br />
+
+@using (Html.BeginForm("Index", "products", FormMethod.Post))
+{
+    <form>
+        <div class="container">
+            <div class="row">
+
+                <input type="text" name="searchString" class="form-control" placeholder="Search Product Name">
+
+                <button type="submit" class="btn btn-primary" name="Search">Search</button>
+
+                <button id="Create" type="button" class="btn btn-info" name="Create">Create</button>
+
+            </div>
+        </div>
+    </form>
+}
+
+<br />
+
+<table class="table">
+    <tr>
+        <th>
+            Name
+        </th>
+        <th>
+            Year
+        </th>
+        <th>
+            Price
+        </th>
+        <th>
+            Brand
+        </th>
+        <th>
+            Category
+        </th>
+        <th>
+
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.product_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.model_year)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.list_price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.brand.brand_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.category.category_name)
+            </td>
+            <td>
+                @*@Html.ActionLink("Edit", "Edit", new { id = item.product_id }, new { @class = "btn btn-primmary" }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.product_id }, new { @class = "btn btn-info" }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.product_id }, new { @class = "btn btn-danger" })*@
+
+                <button id="Edit" type="button" value=@item.product_id class="btn btn-primary">Edit</button>
+                <button id="Details" type="button" value=@item.product_id class="btn btn-info">Details</button>
+                <button id="Delete" type="button" value=@item.product_id class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+    }
+
+</table>
+
+<!----------------------------------------------PAGINATION----------------------------------------------------------------->
+@Html.PagedListPager(Model, i => Url.Action("Index", "products", new { i, search = Request.QueryString["search"] }))
+
+<!--------------------------------------------------------------------------------------------------------------->
+<!-------------------------------------------------MODAL-------------------------------------------------------------->
+
+<div class="modal fade" role="dialog" id="CreateModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Create new Product</h4>
+            </div>
+            <div id="createModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" role="dialog" id="EditModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Edit Product</h4>
+            </div>
+            <div id="editModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" role="dialog" id="DetailsModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Product Details</h4>
+            </div>
+            <div id="detailsModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" role="dialog" id="DeleteModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Delete Product</h4>
+            </div>
+            <div id="deleteModalBody" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<!--------------------------------------------------------------------------------------------------------------->
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $(document).on('click', '#Create', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                $.ajax({
+                    url: '@Url.Action("Create")',
+                    type: 'GET',
+                    success: function (data) {
+                        $('#createModalBody').html(data);
+                        $('#CreateModal').modal('show');
+                    },
+                    error: function () {
+                        alert("There is some problem in the service!")
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).on('click', '#Edit', function (event) {
+
+                let Id = $('#Edit').val()
+
+                $.ajax({
+                    url: '@Url.Action("Edit")',
+                    type: 'GET',
+                    data: {'id' : Id},
+                    success: function (data) {
+                        $('#editModalBody').html(data);
+                        $('#EditModal').modal('show');
+                    },
+                    error: function () {
+                        alert("There is some problem in the service!")
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).on('click', '#Details', function (event) {
+
+                let Id = $('#Details').val()
+
+                $.ajax({
+                    url: '@Url.Action("Details")',
+                    type: 'POST',
+                    data: {'id' : Id},
+                    success: function (data) {
+                        $('#detailsModalBody').html(data);
+                        $('#DetailsModal').modal('show');
+                    },
+                    error: function () {
+                        alert("There is some problem in the service!")
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $(document).on('click', '#Delete', function (event) {
+
+                let Id = $('#Delete').val()
+
+                $.ajax({
+                    url: '@Url.Action("Delete")',
+                    type: 'GET',
+                    data: {'id' : Id},
+                    success: function (data) {
+                        $('#deleteModalBody').html(data);
+                        $('#DeleteModal').modal('show');
+                    },
+                    error: function () {
+                        alert("There is some problem in the service!")
+                    }
+                });
+            });
+        });
+
+
+    </script>
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
